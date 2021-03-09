@@ -125,7 +125,6 @@ void ai_opponent()
         // player 1's turn
         move = get_move(state);
         state.make_move(get<0>(move), get<1>(move), player);
-        cout << state;
         status = state.get_status();
         if (status == "draw") {
             cout << "The game is a draw!\n";
