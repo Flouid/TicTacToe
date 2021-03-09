@@ -21,8 +21,7 @@ public:
 
     void make_move(int row, int col, char player);
     bool is_valid_move(int row, int col) const;
-    bool has_won(char player) const;
-    std::string get_play_state() const;
+    std::string get_status() const;
 
 private:
     std::vector<std::vector<char>> board;

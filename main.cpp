@@ -1,10 +1,11 @@
-#include "GameState.h"
+#include "AIPlayer.h"
 #include <sstream>
 
 using namespace std;
 
 /**
  * Gets the user's choice of playing 'X' or 'O'
+ * Infinitely repeats until a valid choice is given.
  *
  * @return character representing which character the user wishes to play as
  */
@@ -25,6 +26,7 @@ char get_x_or_o()
 
 /**
  * Gets a valid move from the user and returns it.
+ * Infinitely repeats until a valid move is given.
  *
  * @param state game state in order to check that the move is valid
  * @return pair of integers representing the row and column to put a move
@@ -47,6 +49,11 @@ pair<int, int> get_move(const GameState &state)
     }
 }
 
+/**
+ * Driver code to run a game with two human players.
+ * The first selects which character they'd like to use, the second gets the other one.
+ * Proceeds until a draw or a player wins.
+ */
 void two_player()
 {
     // get player characters
@@ -63,13 +70,19 @@ void two_player()
 
     // core gameplay loop
     pair<int, int> move;
+    string status;
     while (true) {
         // player 1's turn
         move = get_move(state);
         state.make_move(get<0>(move), get<1>(move), player1);
         cout << state;
-        if (state.has_won(player1)) {
-            printf("Player 1 has won with %c!\n", player1);
+        status = state.get_status();
+        if (status == "draw") {
+            cout << "The game is a draw!\n";
+            return;
+        }
+        else if (status != "ongoing") {
+            printf("Player 1 won with %c!\n", player1);
             return;
         }
 
@@ -77,9 +90,46 @@ void two_player()
         move = get_move(state);
         state.make_move(get<0>(move), get<1>(move), player2);
         cout << state;
-        if (state.has_won(player2)) {
-            printf("Player 2 has won with %c!\n", player2);
+        status = state.get_status();
+        if (status == "draw") {
+            cout << "The game is a draw!\n";
             return;
+        }
+        else if (status != "ongoing") {
+            printf("Player 2 won with %c!\n", player2);
+            return;
+        }
+    }
+}
+
+/**
+ *
+ */
+void ai_opponent() {
+
+}
+
+/**
+ * Get's the user's choice of mode.
+ * Infinitely repeats the prompt until a valid input is given.
+ *
+ * @return int representing choice of mode
+ */
+int get_mode()
+{
+    int choice;
+    string user_input;
+
+    while (true) {
+        cout << "Which mode would you like to play in?\n";
+        cout << "\t[1] Two player\n";
+        cout << "\t[2] AI opponent\n";
+        cout << "(1/2): ";
+        getline(cin, user_input);
+        stringstream raw(user_input);
+        raw >> choice;
+        if (choice == 1 || choice == 2) {
+            return choice;
         }
     }
 }
