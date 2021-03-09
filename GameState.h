@@ -19,8 +19,9 @@ public:
 
     GameState();
 
-    void make_move(int row, int col, char player_choice);
+    void make_move(int row, int col, char player);
     bool is_valid_move(int row, int col) const;
+    bool has_won(char player) const;
 
 private:
     std::vector<std::vector<char>> board;
