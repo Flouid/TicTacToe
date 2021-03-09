@@ -13,11 +13,14 @@ public:
     AIPlayer() : AIPlayer(' ') {}
     explicit AIPlayer(char p) : player(p) {}
 
-    std::pair<int, int> calculate_next_move(const GameState &state);
+    std::pair<int, int> calculate_next_move(const GameState &state) const;
 
-    char get_player() { return player; }
+    char get_player() const { return player; }
 
 private:
+    std::pair<int, int> make_random_move(const GameState &state) const;
+    std::pair<int, int> attempt_win(const GameState &state) const;
+
     char player;
 };
 
