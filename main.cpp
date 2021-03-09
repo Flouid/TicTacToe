@@ -47,6 +47,43 @@ pair<int, int> get_move(const GameState &state)
     }
 }
 
+void two_player()
+{
+    // get player characters
+    char player1 = get_x_or_o();
+    char player2;
+    if (player1 == 'X')
+        player2 = 'O';
+    else
+        player2 = 'X';
+
+    // initialize the game state
+    GameState state;
+    cout << state;
+
+    // core gameplay loop
+    pair<int, int> move;
+    while (true) {
+        // player 1's turn
+        move = get_move(state);
+        state.make_move(get<0>(move), get<1>(move), player1);
+        cout << state;
+        if (state.has_won(player1)) {
+            printf("Player 1 has won with %c!\n", player1);
+            return;
+        }
+
+        // player 2's turn
+        move = get_move(state);
+        state.make_move(get<0>(move), get<1>(move), player2);
+        cout << state;
+        if (state.has_won(player2)) {
+            printf("Player 2 has won with %c!\n", player2);
+            return;
+        }
+    }
+}
+
 /**
  * Main game driver code.
  *
@@ -54,20 +91,6 @@ pair<int, int> get_move(const GameState &state)
  */
 int main()
 {
-    // get the user's choice of character
-    char x_or_o = get_x_or_o();
-
-    // initialize game state
-    GameState state;
-    cout << state;
-
-    // core gameplay loop
-    while (!state.has_won(x_or_o)) {
-        pair<int, int> move = get_move(state);
-        state.make_move(get<0>(move), get<1>(move), x_or_o);
-        cout << state;
-    }
-
-
+    two_player();
     return 0;
 }
