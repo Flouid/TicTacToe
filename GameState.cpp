@@ -40,9 +40,9 @@ GameState::GameState()
  * @param row integer representing the row designator
  * @param col integer representing the column designator
  */
-void GameState::make_move(int row, int col, char player_choice)
+void GameState::make_move(int row, int col, char player)
 {
-    board[row - 1][col - 1] = player_choice;
+    board[row - 1][col - 1] = player;
 }
 
 /**
@@ -61,4 +61,25 @@ bool GameState::is_valid_move(int row, int col) const
         return false;
     }
     return board[row - 1][col - 1] == ' ';
+}
+
+bool GameState::has_won(char player) const
+{
+    // checks for any winning rows
+    for (int row = 0; row < 3; ++row) {
+        if (board[row][0] == player && board[row][1] == player && board[row][2] == player)
+            return true;
+    }
+    // checks for any winning columns
+    for (int col = 0; col < 3; ++col) {
+        if (board[0][col] == player && board[1][col] == player && board[2][col] == player)
+            return true;
+    }
+    // checks for winning diagonals
+    if (board[0][0] == player && board[1][1] == player && board[2][2] == player)
+        return true;
+    if (board[0][2] == player && board[1][1] == player && board[2][0] == player)
+        return true;
+    // default case
+    return false;
 }
