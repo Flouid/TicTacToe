@@ -138,7 +138,7 @@ void ai_opponent()
 
         // ai player's turn
         move = opponent.calculate_next_move(state);
-        state.make_move(get<0>(move), get<1>(move), player);
+        state.make_move(get<0>(move), get<1>(move), opponent.get_player());
         cout << state;
         status = state.get_status();
         if (status == "draw") {
