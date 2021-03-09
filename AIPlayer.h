@@ -11,7 +11,7 @@ class AIPlayer
 {
 public:
     AIPlayer() : AIPlayer(' ') {}
-    explicit AIPlayer(char p) : player(p) {}
+    explicit AIPlayer(char p);
 
     std::pair<int, int> calculate_next_move(const GameState &state) const;
 
@@ -22,8 +22,11 @@ private:
     std::pair<int, int> attempt_block(const GameState &state) const;
     std::pair<int, int> attempt_fork(const GameState &state) const;
     std::pair<int, int> attempt_corner(const GameState &state) const;
+    static std::pair<int, int> take_empty_corner(const GameState &state);
+    static std::pair<int, int> take_empty_side(const GameState &state);
 
     char player;
+    char user;
 };
 
 #endif //TICTACTOEAI_AIPLAYER_H

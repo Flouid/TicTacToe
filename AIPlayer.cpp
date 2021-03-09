@@ -4,6 +4,15 @@
 
 #include "AIPlayer.h"
 
+AIPlayer::AIPlayer(char p)
+{
+    player = p;
+    if (player == 'X')
+        user = 'O';
+    else
+        user = 'X';
+}
+
 std::pair<int, int> AIPlayer::calculate_next_move(const GameState &state) const
 {
     std::pair<int, int> move;
@@ -27,17 +36,12 @@ std::pair<int, int> AIPlayer::calculate_next_move(const GameState &state) const
     move = attempt_corner(state);
     if (move != default_move)
         return move;
-
-
-    // plays the first valid square
-    for (int row = 0; row < 3; ++row) {
-        for (int col = 0; col < 3; ++col) {
-            if (state.is_valid_move(row + 1, col + 1))
-                return {row + 1, col + 1};
-        }
-    }
-
-    return {-1, -1};
+    // attempts to take an empty corner
+    move = take_empty_corner(state);
+    if (move != default_move)
+        return move;
+    // there must be an empty side to take
+    return take_empty_side(state);
 }
 
 /**
@@ -132,12 +136,6 @@ std::pair<int, int> AIPlayer::attempt_win(const GameState &state) const
  */
 std::pair<int, int> AIPlayer::attempt_block(const GameState &state) const
 {
-    char user;
-    if (player == 'X')
-        user = 'O';
-    else
-        user = 'X';
-
     int player_count;
     int empty_count;
     int row;
@@ -281,9 +279,69 @@ std::pair<int, int> AIPlayer::attempt_fork(const GameState &state) const
     return {-1, -1};
 }
 
+/**
+ * Attempt to find a move that takes a corner that is opposite to the one that the user took.
+ * Returns {-1, -1} if there is no such move.
+ *
+ * @param state game state to look for a cornering move in
+ * @return cornering move or {-1, -1}
+ */
 std::pair<int, int> AIPlayer::attempt_corner(const GameState &state) const
 {
+    // top left corner taken, bottom right corner free
+    if (state.get_board()[0][0] == user && state.get_board()[2][2] == ' ')
+        return {3, 3};
+    // top right corner taken, bottom left corner free
+    if (state.get_board()[0][2] == user && state.get_board()[2][0] == ' ')
+        return {3, 1};
+    // bottom left corner taken, top right corner free
+    if (state.get_board()[2][0] == user && state.get_board()[0][2] == ' ')
+        return {1, 3};
+    // bottom right corner taken, top left corner free
+    if (state.get_board()[2][2] == user && state.get_board()[0][0] == ' ')
+        return {1, 1};
 
+    return {-1, -1};
+}
+
+/**
+ * Attempt to find an empty corner.
+ * Returns {-1, -1} if no such move was found
+ *
+ * @param state game state to look for free corner in
+ * @return free corner move or {-1, -1}
+ */
+std::pair<int, int> AIPlayer::take_empty_corner(const GameState &state)
+{
+    if (state.get_board()[0][0] == ' ')
+        return {1, 1};
+    if (state.get_board()[0][2] == ' ')
+        return {1, 3};
+    if (state.get_board()[2][0] == ' ')
+        return {3, 1};
+    if (state.get_board()[2][2] == ' ')
+        return {3, 3};
+
+    return {-1, -1};
+}
+
+/**
+ * Finds an empty side. Should always find a move.
+ * Returns {-1, -1} if no such move was found.
+ *
+ * @param state game state to look for free side in
+ * @return free side or {-1, -1}
+ */
+std::pair<int, int> AIPlayer::take_empty_side(const GameState &state)
+{
+    if (state.get_board()[0][1] == ' ')
+        return {1, 2};
+    if (state.get_board()[1][0] == ' ')
+        return {2, 1};
+    if (state.get_board()[1][2] == ' ')
+        return {2, 3};
+    if (state.get_board()[2][1] == ' ')
+        return {3, 2};
 
     return {-1, -1};
 }
