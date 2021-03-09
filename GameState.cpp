@@ -63,23 +63,91 @@ bool GameState::is_valid_move(int row, int col) const
     return board[row - 1][col - 1] == ' ';
 }
 
-bool GameState::has_won(char player) const
+/**
+ * Determines if either player has won the game or if the game has drawn.
+ *      If X has won, returns "X"
+ *      If O has won, returns "O"
+ *      If the game is a draw, returns "draw"
+ *      If none of the above, returns "ongoing"
+ *
+ * @return string representing the status of the game
+ */
+std::string GameState::get_status() const
 {
-    // checks for any winning rows
+    // win detection
+    // checks if someone won a row
     for (int row = 0; row < 3; ++row) {
-        if (board[row][0] == player && board[row][1] == player && board[row][2] == player)
-            return true;
+        if (board[row][0] != ' ' && board[row][0] == board[row][1] && board[row][0] == board[row][2])
+            return std::string(1, board[row][0]);
     }
-    // checks for any winning columns
+    // checks if someone won a column
     for (int col = 0; col < 3; ++col) {
-        if (board[0][col] == player && board[1][col] == player && board[2][col] == player)
-            return true;
+        if (board[0][col] != ' ' && board[0][col] == board[1][col] && board[0][col] == board[2][col])
+            return std::string(1, board[0][col]);
     }
-    // checks for winning diagonals
-    if (board[0][0] == player && board[1][1] == player && board[2][2] == player)
-        return true;
-    if (board[0][2] == player && board[1][1] == player && board[2][0] == player)
-        return true;
+    // checks if someone won either diagonal
+    if (board[0][0] != ' ' && board[0][0] == board[1][1] && board[0][0] == board[2][2])
+        return std::string(1, board[0][0]);
+    if (board[0][2] != ' ' && board[0][2] == board[1][1] && board[0][2] == board[2][0])
+        return std::string(1, board[0][0]);
+
+    // draw detection
+    int x_count;
+    int o_count;
+    int row;
+    int col;
+    // counts how many rows have been drawn
+    int rows_drawn = 0;
+    for (row = 0; row < 3; ++row) {
+        x_count = 0;
+        o_count = 0;
+        for (col = 0; col < 3; ++col) {
+            x_count += board[row][col] == 'X';
+            o_count += board[row][col] == 'O';
+        }
+        rows_drawn += x_count > 0 && o_count > 0;
+    }
+    // counts how many columns have been drawn
+    int cols_drawn = 0;
+    for (col = 0; col < 3; ++col) {
+        x_count = 0;
+        o_count = 0;
+        for (row = 0; row < 3; ++row) {
+            x_count += board[row][col] == 'X';
+            o_count += board[row][col] == 'O';
+        }
+        cols_drawn += x_count > 0 && o_count > 0;
+    }
+
+    // checks if the diagonals have been drawn
+    // left diagonal
+    int diagonals_drawn = 0;
+    x_count = 0;
+    o_count = 0;
+    row = 0;
+    col = 0;
+    while (row < 3 && col < 3) {
+        x_count += board[row][col] == 'X';
+        o_count += board[row][col] == 'O';
+        ++row;
+        ++col;
+    }
+    diagonals_drawn += x_count > 0 && o_count > 0;
+    // right diagonal
+    x_count = 0;
+    o_count = 0;
+    row = 0;
+    col = 2;
+    while (row < 3 && col >= 0) {
+        x_count += board[row][col] == 'X';
+        o_count += board[row][col] == 'O';
+        ++row;
+        --col;
+    }
+    diagonals_drawn += x_count > 0 && o_count > 0;
+    if (rows_drawn == 3 && cols_drawn == 3 && diagonals_drawn == 2)
+        return "draw";
+
     // default case
-    return false;
+    return "ongoing";
 }
