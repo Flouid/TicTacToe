@@ -15,16 +15,11 @@ char get_x_or_o()
     return choice;
 }
 
-int main()
+pair<int, int> get_move(const GameState &state)
 {
-    char x_or_o = get_x_or_o();
     string user_input;
-
     int row;
     int col;
-
-    GameState state;
-    cout << state;
     while (true) {
         cout << "Make a move in the form of \"row, col\": ";
         getline(cin, user_input);
@@ -32,12 +27,25 @@ int main()
         raw >> row;
         raw.ignore(); // the ',' character
         raw >> col;
-        if (row < 1 || row > 3 || col < 1 || col > 3) {
-            continue;
-        }
-        state.make_move(row, col, x_or_o);
+        if (state.is_valid_move(row, col))
+            return {row, col};
+    }
+}
+
+int main()
+{
+    char x_or_o = get_x_or_o();
+    string user_input;
+
+    GameState state;
+    cout << state;
+
+    for (int i = 0; i < 10; ++i) {
+        pair<int, int> move = get_move(state);
+        state.make_move(get<0>(move), get<1>(move), x_or_o);
         cout << state;
     }
+
 
     return 0;
 }

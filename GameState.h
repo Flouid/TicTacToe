@@ -20,6 +20,7 @@ public:
     GameState();
 
     void make_move(int row, int col, char player_choice);
+    bool is_valid_move(int row, int col) const;
 
 private:
     std::vector<std::vector<char>> board;

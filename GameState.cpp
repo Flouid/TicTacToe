@@ -44,3 +44,21 @@ void GameState::make_move(int row, int col, char player_choice)
 {
     board[row - 1][col - 1] = player_choice;
 }
+
+/**
+ * Takes a set of parameters representing which row and column the user wishes to input.
+ * Returns whether or not that set of parameters constitutes a valid move.
+ * The move is only valid if the space selected is not already occupied and the parameters correspond
+ * to spaces on the board.
+ *
+ * @param row integer representing the row designator
+ * @param col integer representing the column designator
+ * @return bool representing validity of move
+ */
+bool GameState::is_valid_move(int row, int col) const
+{
+    if (row < 1 || row > 3 || col < 1 || col > 3) {
+        return false;
+    }
+    return board[row - 1][col - 1] == ' ';
+}
