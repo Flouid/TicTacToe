@@ -20,6 +20,8 @@ public:
 private:
     std::pair<int, int> make_random_move(const GameState &state) const;
     std::pair<int, int> attempt_win(const GameState &state) const;
+    std::pair<int, int> attempt_block(const GameState &state) const;
+    std::pair<int, int> attempt_fork(const GameState &state) const;
 
     char player;
 };
