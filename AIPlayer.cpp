@@ -4,6 +4,12 @@
 
 #include "AIPlayer.h"
 
+/**
+ * Constructor for AIPlayer.
+ * Sets player and user character values.
+ *
+ * @param p player choice
+ */
 AIPlayer::AIPlayer(char p)
 {
     player = p;
@@ -13,6 +19,20 @@ AIPlayer::AIPlayer(char p)
         user = 'X';
 }
 
+/**
+ * Go through to flowchart of perfect moves and take the best move available:
+ *      1. Win
+ *      2. Block player
+ *      3. Fork
+ *      4. Block fork (NOT IMPLEMENTED!)
+ *      5. Take center
+ *      6. Take opposite corner from player
+ *      7. Take empty corner
+ *      8. Take empty side
+ *
+ * @param state
+ * @return
+ */
 std::pair<int, int> AIPlayer::calculate_next_move(const GameState &state) const
 {
     std::pair<int, int> move;
@@ -176,32 +196,24 @@ std::pair<int, int> AIPlayer::attempt_block(const GameState &state) const
     // left diagonal
     player_count = 0;
     empty_count = 0;
-    row = 0;
-    col = 0;
-    while (row < 3 && col < 3) {
-        player_count += state.get_board()[row][col] == user;
-        if (state.get_board()[row][col] == ' ') {
+    for (int i = 0; i < 3; ++i) {
+        player_count += state.get_board()[i][i] == user;
+        if (state.get_board()[i][i] == ' ') {
             ++empty_count;
-            move = {row + 1, col + 1};
+            move = {i + 1, i + 1};
         }
-        ++row;
-        ++col;
     }
     if (player_count == 2 && empty_count == 1)
         return move;
     // right diagonal
     player_count = 0;
     empty_count = 0;
-    row = 0;
-    col = 2;
-    while (row < 3 && col >= 0) {
-        player_count += state.get_board()[row][col] == user;
-        if (state.get_board()[row][col] == ' ') {
+    for (int i = 0; i < 3; ++i) {
+        player_count += state.get_board()[i][2 - i] == user;
+        if (state.get_board()[i][2 - i] == ' ') {
             ++empty_count;
-            move = {row + 1, col + 1};
+            move = {i + 1, 3 - i};
         }
-        ++row;
-        --col;
     }
     if (player_count == 2 && empty_count == 1)
         return move;

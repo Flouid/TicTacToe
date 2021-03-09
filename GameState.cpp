@@ -124,25 +124,17 @@ std::string GameState::get_status() const
     int diagonals_drawn = 0;
     x_count = 0;
     o_count = 0;
-    row = 0;
-    col = 0;
-    while (row < 3 && col < 3) {
-        x_count += board[row][col] == 'X';
-        o_count += board[row][col] == 'O';
-        ++row;
-        ++col;
+    for (int i = 0; i < 3; ++i) {
+        x_count += board[i][i] == 'X';
+        o_count += board[i][i] == 'O';
     }
     diagonals_drawn += x_count > 0 && o_count > 0;
     // right diagonal
     x_count = 0;
     o_count = 0;
-    row = 0;
-    col = 2;
-    while (row < 3 && col >= 0) {
-        x_count += board[row][col] == 'X';
-        o_count += board[row][col] == 'O';
-        ++row;
-        --col;
+    for (int i = 0; i < 3; ++i) {
+        x_count += board[i][2 - i] == 'X';
+        o_count += board[i][2 - i] == 'O';
     }
     diagonals_drawn += x_count > 0 && o_count > 0;
     if (rows_drawn == 3 && cols_drawn == 3 && diagonals_drawn == 2)
