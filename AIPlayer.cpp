@@ -20,26 +20,25 @@ std::pair<int, int> AIPlayer::calculate_next_move(const GameState &state) const
     move = attempt_fork(state);
     if (move != default_move)
         return move;
+    // attempts to take the center
+    if (state.is_valid_move(2, 2))
+        return {2, 2};
+    // attempts to take an opposite corner
+    move = attempt_corner(state);
+    if (move != default_move)
+        return move;
 
 
-
-
-    return make_random_move(state);
-}
-
-std::pair<int, int> AIPlayer::make_random_move(const GameState &state) const
-{
-    int row;
-    int col;
-    while (true) {
-        row = rand() % 3 + 1;
-        col = rand() % 3 + 1;
-        if (state.is_valid_move(row, col)) {
-            return {row, col};
+    // plays the first valid square
+    for (int row = 0; row < 3; ++row) {
+        for (int col = 0; col < 3; ++col) {
+            if (state.is_valid_move(row + 1, col + 1))
+                return {row + 1, col + 1};
         }
     }
-}
 
+    return {-1, -1};
+}
 
 /**
  * Checks if there is a winning move and returns it.
@@ -276,8 +275,15 @@ std::pair<int, int> AIPlayer::attempt_fork(const GameState &state) const
                 contributing_lines += (adj_ai_tile && adj_empty_tile);
             }
             if (contributing_lines > 1)
-                return {row, col};
+                return {row + 1, col + 1};
         }
     }
+    return {-1, -1};
+}
+
+std::pair<int, int> AIPlayer::attempt_corner(const GameState &state) const
+{
+
+
     return {-1, -1};
 }

@@ -127,10 +127,12 @@ void ai_opponent()
         state.make_move(get<0>(move), get<1>(move), player);
         status = state.get_status();
         if (status == "draw") {
+            cout << state;
             cout << "The game is a draw!\n";
             return;
         }
         else if (status != "ongoing") {
+            cout << state;
             printf("Player 1 won with %c!\n", player);
             return;
         }
