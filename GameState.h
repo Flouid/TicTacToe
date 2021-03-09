@@ -8,12 +8,18 @@
 #include <iostream>
 #include <vector>
 
+/**
+ * Data type to represent the game state on a given turn.
+ * Internally stores a 2D vector of characters with values ' ', 'X', or 'O'.
+ */
 class GameState
 {
 public:
     friend std::ostream & operator<<(std::ostream &out, const GameState &state);
 
     GameState();
+
+    void make_move(int row, int col, char player_choice);
 
 private:
     std::vector<std::vector<char>> board;
