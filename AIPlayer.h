@@ -10,7 +10,12 @@
 class AIPlayer
 {
 public:
-    AIPlayer(char p) : player(p) {}
+    AIPlayer() : AIPlayer(' ') {}
+    explicit AIPlayer(char p) : player(p) {}
+
+    std::pair<int, int> calculate_next_move(const GameState &state);
+
+    char get_player() { return player; }
 
 private:
     char player;

@@ -105,8 +105,51 @@ void two_player()
 /**
  *
  */
-void ai_opponent() {
+void ai_opponent()
+{
+    // get player character
+    char player = get_x_or_o();
+    AIPlayer opponent;
+    if (player == 'X')
+        opponent = AIPlayer('O');
+    else
+        opponent = AIPlayer('X');
 
+    // initialize the game state
+    GameState state;
+    cout << state;
+
+    pair<int, int> move;
+    string status;
+    while (true) {
+        // player 1's turn
+        move = get_move(state);
+        state.make_move(get<0>(move), get<1>(move), player);
+        cout << state;
+        status = state.get_status();
+        if (status == "draw") {
+            cout << "The game is a draw!\n";
+            return;
+        }
+        else if (status != "ongoing") {
+            printf("Player 1 won with %c!\n", player);
+            return;
+        }
+
+        // ai player's turn
+        move = opponent.calculate_next_move(state);
+        state.make_move(get<0>(move), get<1>(move), player);
+        cout << state;
+        status = state.get_status();
+        if (status == "draw") {
+            cout << "The game is a draw!\n";
+            return;
+        }
+        else if (status != "ongoing") {
+            printf("Opponent won with %c!\n", opponent.get_player());
+            return;
+        }
+    }
 }
 
 /**
@@ -141,6 +184,10 @@ int get_mode()
  */
 int main()
 {
-    two_player();
+    int mode = get_mode();
+    if (mode == 1)
+        two_player();
+    else
+        ai_opponent();
     return 0;
 }
