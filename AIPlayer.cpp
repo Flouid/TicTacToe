@@ -24,7 +24,7 @@ AIPlayer::AIPlayer(char p)
  *      1. Win
  *      2. Block player
  *      3. Fork
- *      4. Block fork (NOT IMPLEMENTED!)
+ *      4. Block fork
  *      5. Take center
  *      6. Take opposite corner from player
  *      7. Take empty corner
@@ -47,6 +47,10 @@ std::pair<int, int> AIPlayer::calculate_next_move(const GameState &state) const
         return move;
     // attempts to fork
     move = attempt_fork(state);
+    if (move != default_move)
+        return move;
+    // attempts to block a fork
+    move = attempt_block_fork(state);
     if (move != default_move)
         return move;
     // attempts to take the center
@@ -113,32 +117,24 @@ std::pair<int, int> AIPlayer::attempt_win(const GameState &state) const
     // left diagonal
     player_count = 0;
     empty_count = 0;
-    row = 0;
-    col = 0;
-    while (row < 3 && col < 3) {
-        player_count += state.get_board()[row][col] == player;
-        if (state.get_board()[row][col] == ' ') {
+    for (int i = 0; i < 3; ++i) {
+        player_count += state.get_board()[i][i] == player;
+        if (state.get_board()[i][i] == ' ') {
             ++empty_count;
             move = {row + 1, col + 1};
         }
-        ++row;
-        ++col;
     }
     if (player_count == 2 && empty_count == 1)
         return move;
     // right diagonal
     player_count = 0;
     empty_count = 0;
-    row = 0;
-    col = 2;
-    while (row < 3 && col >= 0) {
-        player_count += state.get_board()[row][col] == player;
-        if (state.get_board()[row][col] == ' ') {
+    for (int i = 0; i < 3; ++i) {
+        player_count += state.get_board()[i][2 - i] == player;
+        if (state.get_board()[i][2 - i] == ' ') {
             ++empty_count;
             move = {row + 1, col + 1};
         }
-        ++row;
-        --col;
     }
     if (player_count == 2 && empty_count == 1)
         return move;
@@ -223,7 +219,7 @@ std::pair<int, int> AIPlayer::attempt_block(const GameState &state) const
 }
 
 /**
- * Attempt to to find a move that forks the user.
+ * Attempt to find a move that forks the user.
  * Returns {-1, -1} if there is no such move.
  *
  * @param state game state to look for a forking move in
@@ -290,6 +286,178 @@ std::pair<int, int> AIPlayer::attempt_fork(const GameState &state) const
     }
     return {-1, -1};
 }
+
+/**
+ * Attempt to find a move that blocks the forks of the user.
+ * That is, if the user only has one fork available, block it.
+ * Otherwise, if the user has multiple forks available, block in a way that creates two in a row.
+ * Otherwise, force the user to defend by creating two in a row.
+ * Returns {-1, -1} if there is no such move.
+ *
+ * @param state game state to look for a fork blocking move in
+ * @return fork blocking move or {-1, 1}
+ */
+std::pair<int, int> AIPlayer::attempt_block_fork(const GameState &state) const
+{
+    // copy of attempt fork but finding the user's forks instead
+    std::vector<std::pair<int, int>> moves;
+    bool adj_ai_tile;
+    bool adj_empty_tile;
+    // iterate over every tile in the board
+    for(int row = 0; row < 3; ++row) {
+        for (int col = 0; col < 3; ++col) {
+            int contributing_lines = 0;
+            // checks if the current tile is empty...
+            if (state.get_board()[row][col] == ' ') {
+                // checks if the current row contributes to a fork
+                adj_ai_tile = false;
+                adj_empty_tile = false;
+                for (int i = 1; i < 3; ++i) {
+                    if (state.get_board()[(row + i) % 3][col] == user)
+                        adj_ai_tile = true;
+                    if (state.get_board()[(row + i) % 3][col] == ' ')
+                        adj_empty_tile = true;
+                }
+                contributing_lines += (adj_ai_tile && adj_empty_tile);
+                // checks if the current column contributes to a fork
+                adj_ai_tile = false;
+                adj_empty_tile = false;
+                for (int i = 1; i < 3; ++i) {
+                    if (state.get_board()[row][(col + i) % 3] == user)
+                        adj_ai_tile = true;
+                    if (state.get_board()[row][(col + i) % 3] == ' ')
+                        adj_empty_tile = true;
+                }
+                contributing_lines += (adj_ai_tile && adj_empty_tile);
+                // checks if the left diagonal can be a contributing line
+                adj_ai_tile = false;
+                adj_empty_tile = false;
+                if (row == 0 && col == 0) {
+                    for (int i = 1; i < 3; ++i) {
+                        if (state.get_board()[i][i] == user)
+                            adj_ai_tile = true;
+                        if (state.get_board()[i][i] == ' ')
+                            adj_empty_tile = true;
+                    }
+                }
+                contributing_lines += (adj_ai_tile && adj_empty_tile);
+                // checks if the right diagonal can be a contributing line
+                adj_ai_tile = false;
+                adj_empty_tile = false;
+                if (row == 0 && col == 2) {
+                    for (int i = 1; i < 3; ++i) {
+                        if (state.get_board()[i][2 - i] == user)
+                            adj_ai_tile = true;
+                        if (state.get_board()[i][2 - i] == ' ')
+                            adj_empty_tile = true;
+                    }
+                }
+                contributing_lines += (adj_ai_tile && adj_empty_tile);
+            }
+            if (contributing_lines > 1) {
+                moves.emplace_back(row + 1, col + 1);
+            }
+        }
+    }
+    // if only one fork from the user is possible, move into that tile
+    if (moves.size() == 1) {
+        return moves[0];
+    }
+    else if (moves.size() > 1) {
+        // otherwise, choose one that also creates a line of two
+        for (const std::pair<int, int> &move : moves) {
+            int row = std::get<0>(move) - 1;
+            int col = std::get<1>(move) - 1;
+            // checks if it can create a set of two in the row
+            // if so, it's a good move
+            adj_ai_tile = false;
+            adj_empty_tile = false;
+            for (int i = 1; i < 3; ++i) {
+                if (state.get_board()[row][(col + i) % 3] == player)
+                    adj_ai_tile = true;
+                if (state.get_board()[row][(col + i) % 3] == ' ')
+                    adj_empty_tile = true;
+            }
+            if (adj_ai_tile && adj_empty_tile)
+                return move;
+            // checks if it can create a set of two in the column
+            // if so, it's a good move
+            adj_ai_tile = false;
+            adj_empty_tile = false;
+            for (int i = 1; i < 3; ++i) {
+                if (state.get_board()[(row + i) % 3][col] == player)
+                    adj_ai_tile = true;
+                if (state.get_board()[(row + i) % 3][col] == ' ')
+                    adj_empty_tile = true;
+            }
+            if (adj_ai_tile && adj_empty_tile)
+                return move;
+        }
+        // otherwise, choose any move that creates a set of two
+        int player_count;
+        int empty_count;
+        int row;
+        int col;
+        std::pair<int, int> move;
+        // checks if there are any opportunities to create a line of two on rows
+        for (row = 0; row < 3; ++row) {
+            player_count = 0;
+            empty_count = 0;
+            for (col = 0; col < 3; ++col) {
+                player_count += state.get_board()[row][col] == player;
+                if (state.get_board()[row][col] == ' ') {
+                    ++empty_count;
+                    move = {row + 1, col + 1};
+                }
+            }
+            if (player_count == 1 && empty_count == 2) {
+                return move;
+            }
+        }
+        // checks if there are any opportunities to create a line of two on columns
+        for (col = 0; col < 3; ++col) {
+            player_count = 0;
+            empty_count = 0;
+            for (row = 0; row < 3; ++row) {
+                player_count += state.get_board()[row][col] == player;
+                if (state.get_board()[row][col] == ' ') {
+                    ++empty_count;
+                    move = {row + 1, col + 1};
+                }
+            }
+            if (player_count == 1 && empty_count == 2) {
+                return move;
+            }
+        }
+        // checks if there are any opportunities to create a line of two on diagonals
+        // left diagonal
+        player_count = 0;
+        empty_count = 0;
+        for (int i = 0; i < 3; ++i) {
+            player_count += state.get_board()[i][i] == player;
+            if (state.get_board()[i][i] == ' ') {
+                ++empty_count;
+                move = {row + 1, col + 1};
+            }
+        }
+        if (player_count == 1 && empty_count == 2)
+            return move;
+        // right diagonal
+        player_count = 0;
+        empty_count = 0;
+        for (int i = 0; i < 3; ++i) {
+            player_count += state.get_board()[i][2 - i] == player;
+            if (state.get_board()[i][2 - i] == ' ') {
+                ++empty_count;
+                move = {row + 1, col + 1};
+            }
+        }
+        if (player_count == 1 && empty_count == 2)
+            return move;
+    }
+    return {-1, -1};
+}
+
 
 /**
  * Attempt to find a move that takes a corner that is opposite to the one that the user took.
