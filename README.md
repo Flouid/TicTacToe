@@ -1,5 +1,5 @@
 # TicTacToe
-This is a C++ Tic Tac Toe game I am working on where the user plays against a perfect opponent
+This is a C++ Tic Tac Toe game I am working on where the user plays against a perfect opponent. This entire project went from an idea to the completed 1.0.0 version in under 24 hours. 
 
 ## Description
 This program has two modes: A two-player mode and a single-player mode against a perfect AI opponent. In order to play perfectly, the AI opponent implements the algorithm found at the following wikipedia page https://en.wikipedia.org/wiki/Tic-tac-toe#Strategy.
