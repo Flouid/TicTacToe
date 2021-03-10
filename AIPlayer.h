@@ -21,6 +21,7 @@ private:
     std::pair<int, int> attempt_win(const GameState &state) const;
     std::pair<int, int> attempt_block(const GameState &state) const;
     std::pair<int, int> attempt_fork(const GameState &state) const;
+    std::pair<int, int> attempt_block_fork(const GameState &state) const;
     std::pair<int, int> attempt_corner(const GameState &state) const;
     static std::pair<int, int> take_empty_corner(const GameState &state);
     static std::pair<int, int> take_empty_side(const GameState &state);
