@@ -103,7 +103,9 @@ void two_player()
 }
 
 /**
- *
+ * Driver code to run a game with a human player against an AI opponent.
+ * The human selects which character they would like to use and the ai gets the other.
+ * Proceeds until the AI wins or draws.
  */
 void ai_opponent()
 {
